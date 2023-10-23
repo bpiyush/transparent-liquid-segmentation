@@ -33,7 +33,7 @@ def concat_images(images):
     return dst
 
 
-def infer_mask(model, image):
+def infer_mask(model, image, threshold=0.5):
     # Get device from the model parameters
     device = next(model.parameters()).device
     
@@ -46,7 +46,7 @@ def infer_mask(model, image):
     maskPred = model(x.float()).cpu().detach().numpy()
     maskPred = np.squeeze(maskPred)
     maskThresholded = np.zeros_like(maskPred)
-    maskThresholded[maskPred > 0.5] = 255
+    maskThresholded[maskPred > threshold] = 255
     maskThresholded = maskThresholded.astype(np.uint8)
     
     # Convert soft mask to PIL Image
@@ -57,6 +57,29 @@ def infer_mask(model, image):
     hard_mask = PIL.Image.fromarray(maskThresholded).convert("RGB")
     
     return image, soft_mask, hard_mask
+
+
+def load_model(device, ckpt_path=None):
+    # Initialize model
+    print("::: Initializing model :::")
+    model = unet.UNet(n_channels=3, n_classes=1)
+    model = model.float()
+
+    # Load checkpoint
+    print("::: Loading checkpoint :::")
+    if ckpt_path is None:
+        curr_file = os.path.abspath(__file__)
+        curr_dirc = os.path.dirname(curr_file)
+        repo_dirc = os.path.dirname(curr_dirc)
+        ckpt_path = os.path.join(
+            repo_dirc, "data/saved_models/",
+            "transparent_liquid_segmentation_unet_150x300_epoch_0_20231023_15_02_05"
+        )
+        assert os.path.exists(ckpt_path), "Checkpoint does not exist at {}".format(ckpt_path)
+    model.load_state_dict(torch.load(ckpt_path, map_location=device))
+    model = model.to(device)
+    print("::: Checkpoint loaded :::")
+    return model
 
 
 if __name__ == "__main__":
