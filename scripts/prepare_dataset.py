@@ -4,6 +4,7 @@ import cv2
 import copy
 import numpy as np
 import argparse
+from PIL import Image
 
 import utils
 
@@ -71,9 +72,23 @@ def main(args):
                 rgb_img = rgb_img[img_corners[0]: img_corners[1], img_corners[2]: img_corners[3]]
                 rgb_img = cv2.resize(rgb_img, (150, 300))
 
+                # rgb_img_pil = Image.fromarray(rgb_img)
+                # liquid_mask_pil = Image.fromarray(np.clip(liquid_mask * 255, 0, 255).astype(np.uint8))
+                # cup_mask_resized_pil = Image.fromarray(np.clip(cup_mask_resized * 255, 0, 255).astype(np.uint8))
+
                 cv2.imwrite(os.path.join(args.output_dir, "trainA", "rgb_" + str(img_counter) + ".jpg"), rgb_img)
                 cv2.imwrite(os.path.join(args.output_dir, "trainA_liquid_masks", "liquid_mask_" + str(img_counter) + ".jpg"), liquid_mask)
                 cv2.imwrite(os.path.join(args.output_dir, "trainA_cup_masks", "cup_mask_" + str(img_counter) + ".jpg"), cup_mask_resized)
+                
+                # Save liquid mask as npy file
+                np.save(os.path.join(args.output_dir, "trainA_liquid_masks", "liquid_mask_" + str(img_counter) + ".npy"), liquid_mask)
+                # Save cup mask as npy file
+                np.save(os.path.join(args.output_dir, "trainA_cup_masks", "cup_mask_" + str(img_counter) + ".npy"), cup_mask_resized)
+                
+                # if img_counter == 50:
+                #     import shared_utils as su
+                #     su.viz.concat_images([Image.fromarray(rgb_img), Image.fromarray(liquid_mask)])
+                #     import ipdb; ipdb.set_trace()
             
             if args.mode == "transparent":
                 rgb_img = rgb_img[img_corners[0]: img_corners[1], img_corners[2]: img_corners[3]]
@@ -81,6 +96,7 @@ def main(args):
                 cv2.imwrite(os.path.join(args.output_dir, "trainB", "rgb_" + str(img_counter) + ".jpg"), rgb_img)
                 cv2.imwrite(os.path.join(args.output_dir, "trainB_cup_masks", "cup_mask_" + str(img_counter) + ".jpg"), cup_mask_resized)
             
+            print(img_counter)
             img_counter += 1
             
             # For debugging
@@ -89,6 +105,7 @@ def main(args):
             # cv2.imshow("liquid_mask", liquid_mask)
             # cv2.imshow("cup_mask_resized", cup_mask_resized)
             # cv2.waitKey()
+        # import ipdb; ipdb.set_trace()
         
 
 if __name__ == "__main__":
