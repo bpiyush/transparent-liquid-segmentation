@@ -4,6 +4,7 @@ Segment_Transparent_Objects/demo/
 data/
 logs/
 checkpoints/
+wandb/
 
 # images
 *.jpg
