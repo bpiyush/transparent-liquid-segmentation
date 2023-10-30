@@ -17,9 +17,10 @@ from torch.utils.data import DataLoader
 
 
 class LiquidSegmentationV1(Dataset):
-    def __init__(self, data_dir, processor, imsize=(256, 256), preload=True):
+    def __init__(self, data_dir, split, processor, imsize=(256, 256), preload=True):
 
         self.data_dir = data_dir
+        self.split = split
         self.preload = preload
         self.imsize = imsize
         self.processor = processor
@@ -29,10 +30,15 @@ class LiquidSegmentationV1(Dataset):
         self.image_dir = join(data_dir, "fakeB")
         self.amask_dir = join(data_dir, "trainA_liquid_masks")
         self.cup_mask_dir = join(data_dir, "trainA_cup_masks")
+        
+        # Load split indices
+        assert self.split in ["train", "val"]
+        split_path = join(data_dir, f"metadata/{self.split}V1.txt")
+        split_indices = np.loadtxt(split_path, dtype=int)
 
         data = []
-        n_images = len(glob(join(self.image_dir, "*.png")))
-        for i in tqdm.tqdm(range(n_images), desc="Loading data"):
+        n_images = len(split_indices)
+        for i in tqdm.tqdm(split_indices, desc=f"Loading data for split {self.split}"):
             item = {
                 "image_path": join(self.image_dir, f"rgb_{i}.png"),
                 "liquid_mask_path": join(self.amask_dir, f"liquid_mask_{i}.npy"),
@@ -134,7 +140,7 @@ if __name__ == "__main__":
     # Load dataset
     data_dir = "./data/datasets/pouring_dataset"
     processor = SamProcessor.from_pretrained("facebook/sam-vit-base")
-    ds = LiquidSegmentationV1(data_dir=data_dir, processor=processor, preload=False)
+    ds = LiquidSegmentationV1(data_dir=data_dir, split="val", processor=processor, preload=False)
     start = time.time()
     item = ds[0]
     end = time.time()
@@ -145,7 +151,7 @@ if __name__ == "__main__":
     # Load dataset with preloading
     data_dir = "./data/datasets/pouring_dataset"
     processor = SamProcessor.from_pretrained("facebook/sam-vit-base")
-    ds = LiquidSegmentationV1(data_dir=data_dir, processor=processor, preload=True)
+    ds = LiquidSegmentationV1(data_dir=data_dir, split="val", processor=processor, preload=True)
     start = time.time()
     item = ds[0]
     end = time.time()
