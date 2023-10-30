@@ -67,7 +67,11 @@ def main(args):
                 liquid_mask[cup_mask == 0] = 0 # Remove regions exterior to cup
                 liquid_mask = liquid_mask[img_corners[0]: img_corners[1], img_corners[2]: img_corners[3]]
                 liquid_mask = cv2.resize(liquid_mask, (150, 300))
-                liquid_mask = liquid_mask / liquid_mask.max()
+                
+                if liquid_mask.max() > 0:
+                    liquid_mask = liquid_mask / liquid_mask.max()
+                else:
+                    liquid_mask = np.zeros_like(liquid_mask)
 
                 rgb_img = rgb_img[img_corners[0]: img_corners[1], img_corners[2]: img_corners[3]]
                 rgb_img = cv2.resize(rgb_img, (150, 300))

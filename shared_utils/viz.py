@@ -79,7 +79,6 @@ def alpha_mask_to_pil_image(amask, threshold=0.5):
     return amask_pil
 
 
-
 def mask_to_bounding_box(ground_truth_map, perturbation=10):
     """
     Ref: https://github.com/NielsRogge/Transformers-Tutorials/blob/master/SAM/Fine_tune_SAM_(segment_anything)_on_a_custom_dataset.ipynb
@@ -98,3 +97,12 @@ def mask_to_bounding_box(ground_truth_map, perturbation=10):
     bbox = [x_min, y_min, x_max, y_max]
 
     return bbox
+
+
+def resize_mask(mask, size=(256, 256)):
+    mask = mask.copy()
+    from skimage.transform import resize
+    assert isinstance(mask, np.ndarray), f"Mask must be a numpy array, got {type(mask)}"
+    assert len(mask.shape) == 2, f"Mask must be a 2D array, got {mask.shape}"
+    resized_mask = resize(mask, size, mode='constant', anti_aliasing=False)
+    return resized_mask
