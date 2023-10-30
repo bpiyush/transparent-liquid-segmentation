@@ -3,6 +3,7 @@ contrastive-unpaired-translation/datasets/pouring/
 Segment_Transparent_Objects/demo/
 data/
 logs/
+checkpoints/
 
 # images
 *.jpg

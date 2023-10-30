@@ -134,6 +134,13 @@ class LiquidSegmentationV1(Dataset):
         return inputs
 
 
+def load_dataset(split):
+    data_dir = "./data/datasets/pouring_dataset"
+    processor = SamProcessor.from_pretrained("facebook/sam-vit-base")
+    ds = LiquidSegmentationV1(data_dir=data_dir, split=split, processor=processor, preload=False)
+    return ds
+
+
 if __name__ == "__main__":
     import time
     
