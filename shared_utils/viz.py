@@ -1,6 +1,7 @@
 import PIL
 from PIL import Image, ImageOps, ImageDraw
 import numpy as np
+import matplotlib.pyplot as plt
 
 # define predominanat colors
 COLORS = {
@@ -106,3 +107,43 @@ def resize_mask(mask, size=(256, 256)):
     assert len(mask.shape) == 2, f"Mask must be a 2D array, got {mask.shape}"
     resized_mask = resize(mask, size, mode='constant', anti_aliasing=False)
     return resized_mask
+
+
+def show_grid_of_images(
+        images: np.ndarray, n_cols: int = 4, figsize: tuple = (8, 8), subtitlesize=14,
+        cmap=None, subtitles=None, title=None, save=False, savepath="sample.png", titlesize=20,
+        ysuptitle=0.8, xlabels=None, sizealpha=0.7,
+    ):
+    """Show a grid of images."""
+    n_cols = min(n_cols, len(images))
+
+    copy_of_images = images.copy()
+    for i, image in enumerate(copy_of_images):
+        if isinstance(image, Image.Image):
+            image = np.asarray(image)
+            copy_of_images[i] = image
+
+    if subtitles is None:
+        subtitles = [None] * len(images)
+
+    if xlabels is None:
+        xlabels = [None] * len(images)
+
+    n_rows = int(np.ceil(len(images) / n_cols))
+    fig, axes = plt.subplots(n_rows, n_cols, figsize=figsize)
+    for i, ax in enumerate(axes.flat):
+        if i < len(copy_of_images):
+            if len(copy_of_images[i].shape) == 2 and cmap is None:
+                cmap="gray"
+            ax.imshow(copy_of_images[i], cmap=cmap)
+            ax.set_title(subtitles[i], fontsize=subtitlesize)
+        ax.set_xlabel(xlabels[i], fontsize=sizealpha * subtitlesize)
+        # ax.axis('off')
+        ax.set_xticks([])
+        ax.set_yticks([])
+
+    fig.tight_layout()
+    plt.suptitle(title, y=ysuptitle, fontsize=titlesize)
+    if save:
+        plt.savefig(savepath, bbox_inches='tight')
+    plt.show()

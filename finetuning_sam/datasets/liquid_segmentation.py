@@ -7,7 +7,6 @@ import matplotlib.pyplot as plt
 from glob import glob
 import cv2
 from natsort import natsorted
-import tqdm
 
 import shared_utils as su
 
@@ -38,7 +37,7 @@ class LiquidSegmentationV1(Dataset):
 
         data = []
         n_images = len(split_indices)
-        for i in tqdm.tqdm(split_indices, desc=f"Loading data for split {self.split}"):
+        for i in su.log.tqdm_iterator(split_indices, desc=f"Loading data for split {self.split}"):
             item = {
                 "image_path": join(self.image_dir, f"rgb_{i}.png"),
                 "liquid_mask_path": join(self.amask_dir, f"liquid_mask_{i}.npy"),
@@ -134,10 +133,15 @@ class LiquidSegmentationV1(Dataset):
         return inputs
 
 
-def load_dataset(split):
-    data_dir = "./data/datasets/pouring_dataset"
+def load_dataset(split, preload=True, return_processor=False):
+    curr_file = os.path.abspath(__file__)
+    curr_dirc = os.path.dirname(curr_file)
+    repo_dirc = os.path.dirname(os.path.dirname(curr_dirc))
+    data_dir = join(repo_dirc, "data/datasets/pouring_dataset")
     processor = SamProcessor.from_pretrained("facebook/sam-vit-base")
-    ds = LiquidSegmentationV1(data_dir=data_dir, split=split, processor=processor, preload=False)
+    ds = LiquidSegmentationV1(data_dir=data_dir, split=split, processor=processor, preload=preload)
+    if return_processor:
+        return ds, processor
     return ds
 
 
